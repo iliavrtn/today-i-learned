@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import supabase from "./supabase";
 import "./style.css";
 
 const CATEGORIES = [
@@ -60,19 +61,44 @@ function Counter() {
 
 function App() {
   const [showForm, setShowForm] = useState(false);
-  const [facts, setFacts] = useState(initialFacts);
+  const [facts, setFacts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(function () {
+    async function getFacts() {
+      setIsLoading(true);
+      const { data: facts, error } = await supabase
+        .from("facts")
+        .select("*")
+        .order("votesInteresting", { ascending: false })
+        .limit(1000);
+
+      if (!error) setFacts(facts);
+      else alert("There was a problem getting data");
+      setIsLoading(false);
+    }
+    getFacts();
+  }, []);
   return (
     <>
       {/* HEADER */}
       <Header showForm={showForm} setShowForm={setShowForm} />
       {showForm ? (
-        <NewFactForm setFacts={setFacts} setShowForm={showForm} />
+        <NewFactForm setFacts={setFacts} setShowForm={setShowForm} />
       ) : null}
       <main className="main">
         <CategoryFilter />
-        <FactList facts={facts} />
+        {isLoading ? <Loader /> : <FactList facts={facts} />}
       </main>
     </>
+  );
+}
+
+function Loader() {
+  return (
+    <div className="spinner-container">
+      <div className="loading-spinner"></div>
+    </div>
   );
 }
 
@@ -190,6 +216,7 @@ function FactList({ facts }) {
           <Fact key={fact.id} factObj={fact} />
         ))}
       </ul>
+      <p>There are {facts.length} facts in the database. Add your own!</p>
     </section>
   );
 }
@@ -220,7 +247,7 @@ function Fact({ factObj }) {
       </span>
       <div className="vote-buttons">
         <button>👍 {factObj.votesInteresting}</button>
-        <button>🤯 {factObj.votesMindblowing}</button>
+        <button>🤯 {factObj.votesMindBlowing}</button>
         <button>⛔ {factObj.votesFalse}</button>
       </div>
     </li>
