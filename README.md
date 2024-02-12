@@ -1,4 +1,4 @@
-# Simple Fullstack project using HTML5, CSS3, JavaScript, React
+# Fullstack project using HTML5, CSS3, JavaScript, React
 
 [Today I Learned](https://today-i-learned-iliav.netlify.app/)
 
